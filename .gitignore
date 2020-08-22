@@ -14,6 +14,9 @@
 *.obj
 *.pyc
 
+# pdf
+*.pdf
+
 # profiling files and core files
 *.nvprof
 core
@@ -74,11 +77,13 @@ GSYMS
 
 # /egs/
 /egs/*/*/mfcc
+/egs/*/*/fbank
 /egs/*/*/plp
 /egs/*/*/exp
 /egs/*/*/data
 /egs/*/*/wav
 /egs/*/*/enhan
+/egs/yesno/s5/waves_yesno
 
 # /tools/
 /tools/pocolm/

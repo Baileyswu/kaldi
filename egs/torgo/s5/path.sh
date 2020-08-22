@@ -2,7 +2,7 @@
 export KALDI_ROOT=/home/danliwoo/gplab/kaldi
 
 # Location of the Torgo corpus (.../torgo/data/)
-export CORPUS=
+export CORPUS=/home/data/TORGO
 
 if [ -z $KALDI_ROOT ]; then
   echo "You need to set the KALDI_ROOT variable in path.sh to point to the location of your Kaldi installation."

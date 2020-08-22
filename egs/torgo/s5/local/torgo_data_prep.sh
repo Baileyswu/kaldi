@@ -18,6 +18,7 @@ echo ""
 
 # Utterances to discard
 bad_utts=conf/bad_utts
+rm $bad_utts
 
 # Look for the necessary information in the original data
 echo "--- Looking into the original data ..."
@@ -67,7 +68,7 @@ for waves in ${train_sessions[@]} ; do
     # get the nomenclature
     session=$(dirname $waves)        
     ssn=$(basename $session)
-    tmp=${session#*/data/}
+    tmp=${session#*$CORPUS/}
     spk=${tmp%/Sess*}
     mic=${waves#*wav_}
     echo "  $spk $ssn $mic"
