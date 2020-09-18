@@ -1,6 +1,10 @@
 conf/queue.conf
 
 data
+mdata
+sdata
+split
 exp
 steps
 utils
+download

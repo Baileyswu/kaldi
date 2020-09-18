@@ -44,7 +44,7 @@ fi
 if [ $# -ge 3 ]; then
   mfccdir=$3
 else
-  mfccdir=$data/data
+  mfccdir=$data/mfcc
 fi
 
 # make $mfccdir an absolute pathname.
@@ -69,7 +69,7 @@ required="$scp $mfcc_config $mfcc_config_dys"
 
 for f in $required; do
   if [ ! -f $f ]; then
-    echo "make_mfcc.sh: no such file $f"
+    echo "[Error] make_mfcc.sh: no such file $f"
     exit 1;
   fi
 done
@@ -139,7 +139,7 @@ else
      fi
 
      ($cmd $logdir/make_mfcc_${name}.$JOB.log \
-       compute-mfcc-feats  $vtln_opts --verbose=2 --config=$config \
+        compute-mfcc-feats  $vtln_opts --verbose=2 --config=$config \
         scp,p:$logdir/wav_${name}.$JOB.scp ark:- \| \
         copy-feats --compress=$compress ark:- \
         ark,scp:$mfccdir/raw_mfcc_$name.$JOB.ark,$mfccdir/raw_mfcc_$name.$JOB.scp \
@@ -156,6 +156,8 @@ if [ -f $logdir/.error.$name ]; then
 fi
 
 # concatenate the .scp files together.
+# don't change the name `feats.scp` for it's unchangable 
+# at compute_cmvn_stats.sh
 for n in $(seq $nj); do
   cat $mfccdir/raw_mfcc_$name.$n.scp || exit 1;
 done > $data/feats.scp
