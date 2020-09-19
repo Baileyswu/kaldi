@@ -116,24 +116,23 @@ if [ $stage -le 3 ]; then
         # Prepare the lexicon and various phone lists
         # Pronunciations for OOV words are obtained using a pre-trained Sequitur model
         local/multi_torgo_prepare_dict.sh $datadir/$wav_type/local || exit 1
-    done
-    exit 0
-    for spk in $speakers; do
-        for utts in single single_nolimit multi; do
-            # Prepare data/lang folder.
-            echo ""
-            echo "=== Preparing data/lang and data/local/lang directories ..."
-            echo ""
-            utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
-                                  data/local/dict '!SIL' data/$spk/local/lang \
-                                  data/$spk/lang || exit 1
+        for spk in $speakers; do
+            for utts in single single_nolimit multi; do
+                # Prepare data/lang folder.
+                echo ""
+                echo "=== Preparing data/lang and data/local/lang directories ..."
+                echo ""
+                utils/prepare_lang.sh --position-dependent-phones $pos_dep_phones \
+                                    $datadir/$wav_type/local/dict '!SIL' split/$wav_type/$spk/local/lang \
+                                    split/$wav_type/$spk/lang || exit 1
 
-            # Prepare G.fst
-            local/torgo_prepare_grammar.sh $spk $utts || exit 1
+                # Prepare G.fst
+                local/multi_torgo_prepare_grammar.sh $wav_type $spk $utts || exit 1
+            done
         done
     done
 fi
-exit 0
+
 # Train monophone models.
 if [ $stage -le 4 ] && [ "$train" = true ] ; then
     for spk in $speakers; do

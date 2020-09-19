@@ -73,7 +73,7 @@ if ! g2p=`which g2p.py` ; then
   echo "Go to $KALDI_ROOT/tools and execute extras/install_sequitur.sh"
   exit 1
 fi
-set -x -e
+
 echo "--- Preparing pronunciations for OOV words ..."
 g2p.py --model=conf/g2p_model --apply $dict/vocab-oov.txt > $dict/lexicon-oov.txt || exit 1
 

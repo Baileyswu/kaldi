@@ -52,5 +52,6 @@ cat $data/local_{single,multi}/vocab-full.txt | sort | uniq > $data/local/vocab-
 
 set -e
 pushd $data
+  rm local_single_nolimit
   ln -s local_single local_single_nolimit
 popd
