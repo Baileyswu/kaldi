@@ -46,7 +46,7 @@ if [ $stage -le 0 ]; then
     # Initial extraction of the data.
     for wav_type in array head; do
         local/multi_torgo_data_prep.sh $wav_type || exit 1
-        local/multi_corpus_statistics.sh $wav_type || exit 1
+        local/multi_corpus_statistics.sh $datadir/$wav_type || exit 1
     done
 fi
 
@@ -135,31 +135,35 @@ fi
 
 # Train monophone models.
 if [ $stage -le 4 ] && [ "$train" = true ] ; then
-    for spk in $speakers; do
-        rm -rdf exp/mono/$spk
-        mkdir -p exp/mono/$spk
-        nj=$(cat data/$spk/train/spk2utt | wc -l)
-        steps/train_mono.sh --nj $nj --cmd "$train_cmd" \
-                            data/$spk/train data/$spk/lang exp/mono/$spk \
-                            >& exp/mono/$spk/train.log &
+    for wav_type in array head; do
+        for spk in $speakers; do
+            rm -rdf exp/$wav_type/mono/$spk
+            mkdir -p exp/$wav_type/mono/$spk
+            nj=$(cat split/$wav_type/$spk/train/spk2utt | wc -l)
+            steps/train_mono.sh --nj $nj --cmd "$train_cmd" \
+                                split/$wav_type/$spk/train split/$wav_type/$spk/lang exp/$wav_type/mono/$spk \
+                                >& exp/$wav_type/mono/$spk/train.log &
+        done
+        wait;
     done
-    wait;
 fi
 
 # Monophone decoding.
 if [ $stage -le 5 ]; then
-    for spk in $speakers; do
-        (
-        for x in $tests; do     
-            utils/mkgraph.sh data/$spk/lang_$x exp/mono/$spk \
-                             exp/mono/$spk/graph_$x >& exp/mono/$spk/mkgraph.log
-            steps/decode.sh --nj $nj_decode --cmd "$decode_cmd" \
-                            exp/mono/$spk/graph_$x data/$spk/$x \
-                            exp/mono/$spk/decode_$x >& exp/mono/$spk/decode.log
+    for wav_type in array head; do
+        for spk in $speakers; do
+            (
+            for x in $tests; do     
+                utils/mkgraph.sh split/$wav_type/$spk/lang_$x exp/$wav_type/mono/$spk \
+                                exp/$wav_type/mono/$spk/graph_$x >& exp/$wav_type/mono/$spk/mkgraph.log
+                steps/decode.sh --nj $nj_decode --cmd "$decode_cmd" \
+                                exp/$wav_type/mono/$spk/graph_$x split/$wav_type/$spk/$x \
+                                exp/$wav_type/mono/$spk/decode_$x >& exp/$wav_type/mono/$spk/decode.log
+            done
+            ) &
         done
-        ) &
+        wait;
     done
-    wait;
 fi
 
 # Train tri1 (first triphone pass).

@@ -16,26 +16,35 @@ echo ""
 
 . utils/parse_options.sh
 
+datadir=cdata
+wav_type=$1
+
 # Utterances to discard
-bad_utts=conf/bad_utts
+bad_utts=conf/bad_utts_consistent_$wav_type
 rm $bad_utts
 
 # Look for the necessary information in the original data
 echo "--- Looking into the original data ..."
 num_users=0
 num_sessions=0
+num_no_prompts=0
+
 for speaker in $CORPUS/* ; do
     spk=$(basename $speaker)
     global=false  #all the information in any session of a user
-    for waves in $speaker/S*/wav_* ; do
+    for waves in $speaker/Session*/wav_$wav_type* ; do
+        ssn=$(dirname $waves)
         info=false  #all the information within a session
-        if  [ -d "$waves" ] ; then
+        if [ -d "$ssn/wav_arrayMic" ] && [ -d "$ssn/wav_headMic" ]; then
             acoustics=true
             transcript="${waves/wav_*Mic/prompts}"
             if  [ -d "$transcript" ] ; then
                 transcriptions=true
                 info=true
-	        global=true
+	            global=true
+            else
+                echo "$waves no prompts"
+                ((num_no_prompts++))
             fi
         fi
         if [ "$info" = true ] ; then
@@ -50,13 +59,13 @@ for speaker in $CORPUS/* ; do
     fi
 done
 echo "  $num_users users have all necessary data"
+echo "  with $num_sessions sessions has prompts and $num_no_prompts no prompts"
 echo "     ${train_spks[@]}"
-
 echo ""
 echo "--- Extracting data ..."
 
 # Create the main folders to store the data
-data=data/all_speakers
+data=$datadir/$wav_type
 mkdir -p $data
 
 # Create the data
@@ -79,6 +88,7 @@ for waves in ${train_sessions[@]} ; do
         utt="${doc%.txt}"
         utt=$(basename $utt)
         id="$spk-$ssn-$mic-$utt"
+        wav=$(basename waves)
         # The corpus has incomplete transcriptions. Till solved we remove
         # transcriptions with comments.
         if [[ $line == *'['*']'* ]] ; then
@@ -94,8 +104,14 @@ for waves in ${train_sessions[@]} ; do
         #  should be included.
         if [[ $line == *'input/images'* ]] ; then
             echo "$id # untranscribed image description" >> $bad_utts
-	    continue
+	        continue
         fi
+
+        if [ ! -f $session/wav_arrayMic/$utt.wav ] || [ ! -f $session/wav_headMic/$utt.wav ]; then
+            echo "$id # miss another view" >> $bad_utts
+            continue
+        fi
+        
         line="$id ${line^^}"
         if [ -f $waves/$utt.wav ] ; then  # Only files with all the associated info are written
             wav="$id $waves/$utt.wav"
@@ -118,4 +134,3 @@ sort -u -o $bad_utts $bad_utts
 rm $data/*.unsorted
 utils/utt2spk_to_spk2utt.pl $data/utt2spk > $data/spk2utt
 
-local/corpus_statistics.sh $data

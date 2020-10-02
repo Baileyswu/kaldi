@@ -75,7 +75,7 @@ if ! g2p=`which g2p.py` ; then
 fi
 
 echo "--- Preparing pronunciations for OOV words ..."
-g2p.py --model=conf/g2p_model --apply $dict/vocab-oov.txt > $dict/lexicon-oov.txt
+g2p.py --model=conf/g2p_model --apply $dict/vocab-oov.txt > $dict/lexicon-oov.txt || exit 1
 
 cat $dict/lexicon-oov.txt $dict/lexicon-iv.txt |\
   sort > $dict/lexicon.txt

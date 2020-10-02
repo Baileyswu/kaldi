@@ -39,14 +39,13 @@ if [ -z $loc ]; then
   fi
 fi
 
-local=data/local_$x
 mkdir -p data/local_{single,multi}
 
 ngram-count -order 1 -write-vocab data/local_single/vocab-full.txt -wbdiscount \
             -text data/text_uniq_single -lm data/local_single/lm.arpa
 ngram-count -order 2 -write-vocab data/local_multi/vocab-full.txt -wbdiscount \
             -text data/text_uniq_multi -lm data/local_multi/lm.arpa
-mkdir data/local
+mkdir -p data/local
 cat data/local_{single,multi}/vocab-full.txt | sort | uniq > data/local/vocab-full.txt
 cd data
 ln -s local_single local_single_nolimit
