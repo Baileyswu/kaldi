@@ -323,19 +323,21 @@ fi
 
 # Decode SGMM.
 if [ $stage -le 13 ]; then
-    for spk in $speakers; do
-        (
-        for x in $tests; do
-            utils/mkgraph.sh data/$spk/lang_$x $exp/sgmm/$wav_type/$spk \
-                             $exp/sgmm/$wav_type/$spk/graph_$x >& $exp/sgmm/$wav_type/$spk/mkgraph.log
-            steps/decode_sgmm2.sh --use-fmllr true --nj $nj_decode \
-                                  --cmd "$decode_cmd" \
-                                  --transform-dir $exp/tri3/$wav_type/$spk/decode_$x \
-                                  $exp/sgmm/$wav_type/$spk/graph_$x $split/$wav_type/$spk/$x \
-                                  $exp/sgmm/$wav_type/$spk/decode_$x \
-                                  >& $exp/sgmm/$wav_type/$spk/decode.log
+    for wav_type in array head; do
+        for spk in $speakers; do
+            (
+            for x in $tests; do
+                utils/mkgraph.sh data/$spk/lang_$x $exp/sgmm/$wav_type/$spk \
+                                $exp/sgmm/$wav_type/$spk/graph_$x >& $exp/sgmm/$wav_type/$spk/mkgraph.log
+                steps/decode_sgmm2.sh --use-fmllr true --nj $nj_decode \
+                                    --cmd "$decode_cmd" \
+                                    --transform-dir $exp/tri3/$wav_type/$spk/decode_$x \
+                                    $exp/sgmm/$wav_type/$spk/graph_$x $split/$wav_type/$spk/$x \
+                                    $exp/sgmm/$wav_type/$spk/decode_$x \
+                                    >& $exp/sgmm/$wav_type/$spk/decode.log
+            done
+            ) &
         done
-        ) &
     done
     wait;
 fi
