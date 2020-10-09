@@ -46,7 +46,7 @@ if [ $stage -le 0 ] && [ "$train" = true ] ; then
     for wav_type in array head; do
         for spk in $speakers; do
             (
-            for z in dev test train; do
+            for z in dev test; do
                 rm -rdf $exp/tri3_ali_$z/$wav_type/$spk
                 mkdir -p $exp/tri3_ali_$z/$wav_type/$spk
                 nj=$(cat $split/$wav_type/$spk/$z/spk2utt | wc -l)
