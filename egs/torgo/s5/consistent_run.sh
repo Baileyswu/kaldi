@@ -300,20 +300,20 @@ if [ $stage -le 12 ] && [ "$train" = true ] ; then
     for wav_type in array head; do
         for spk in $speakers; do
             (
-            rm -rdf $exp/tri3_ali/$wav_type/$spk $exp/ubm/$spk $exp/sgmm/$wav_type/$spk
-            mkdir -p $exp/tri3_ali/$wav_type/$spk $exp/ubm/$spk $exp/sgmm/$wav_type/$spk
+            rm -rdf $exp/tri3_ali/$wav_type/$spk $exp/ubm/$wav_type/$spk $exp/sgmm/$wav_type/$spk
+            mkdir -p $exp/tri3_ali/$wav_type/$spk $exp/ubm/$wav_type/$spk $exp/sgmm/$wav_type/$spk
             nj=$(cat $split/$wav_type/$spk/train/spk2utt | wc -l)
             steps/align_fmllr.sh --nj $nj --cmd "$train_cmd" --use-graphs true \
                                 $split/$wav_type/$spk/train data/$spk/lang $exp/tri3/$wav_type/$spk \
                                 $exp/tri3_ali/$wav_type/$spk >& $exp/tri3_ali/$wav_type/$spk/align.log
             steps/train_ubm.sh --silence-weight 0.5 --cmd "$train_cmd" 400 \
                             $split/$wav_type/$spk/train data/$spk/lang $exp/tri3_ali/$wav_type/$spk \
-                            $exp/ubm/$spk >& $exp/ubm/$spk/train.log
+                            $exp/ubm/$wav_type/$spk >& $exp/ubm/$wav_type/$spk/train.log
             sgmm_leaves=8000
             sgmm_substates=19000
             steps/train_sgmm2.sh --cmd "$train_cmd" $sgmm_leaves $sgmm_substates \
                                 $split/$wav_type/$spk/train data/$spk/lang $exp/tri3_ali/$wav_type/$spk \
-                                $exp/ubm/$spk/final.ubm $exp/sgmm/$wav_type/$spk \
+                                $exp/ubm/$wav_type/$spk/final.ubm $exp/sgmm/$wav_type/$spk \
                                 >& $exp/sgmm/$wav_type/$spk/train.log
             ) &
         done
