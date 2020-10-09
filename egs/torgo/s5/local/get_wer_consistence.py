@@ -27,7 +27,7 @@ def get_wer(spk, subset, lmwt='*'):
     decode_dir = fnmatch.filter(os.listdir(spk_exp_dir),
                                 'decode*' + subset)
     if len(decode_dir) < 1:
-        print("no decode dir at ", spk_exp_dir)
+        print("no decode dir at", spk_exp_dir)
         return "no"
     assert(len(decode_dir) == 1)
     decode_dir = os.path.join(spk_exp_dir, decode_dir[0])
